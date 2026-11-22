@@ -172,8 +172,8 @@
         treePos[i * 3]     = Math.cos(th) * r;
         treePos[i * 3 + 1] = y;
         treePos[i * 3 + 2] = Math.sin(th) * r;
-        // 冰蓝渐变：底部深钢蓝 -> 顶部冰蓝/银白（匹配参考图）
-        cTree.setHSL(0.60 - t * 0.08, rand(0.45, 0.62), rand(0.24, 0.34) + t * 0.32);
+        // 紫色渐变：底部深紫/品红 -> 顶部亮品红/粉紫（匹配参考图）
+        cTree.setHSL(rand(0.78, 0.86), rand(0.55, 0.95), rand(0.12, 0.24) + t * 0.38);
         treeCol[i * 3] = cTree.r; treeCol[i * 3 + 1] = cTree.g; treeCol[i * 3 + 2] = cTree.b;
       }
       var treeGeo = new THREE.BufferGeometry();
@@ -188,7 +188,7 @@
       var ORN_COUNT = 320;
       var ornPos = new Float32Array(ORN_COUNT * 3);
       var ornCol = new Float32Array(ORN_COUNT * 3);
-      var palette = ['#4ad8ff', '#7aa2ff', '#ffffff', '#c0e0ff', '#dfeaff', '#bcd8ff', '#9ecbff', '#00e5ff'];
+      var palette = ['#e070e0', '#c040c8', '#ff6ad5', '#a848a8', '#f090f0', '#d050d8', '#ff8ae8', '#9030a0'];
       var cOrn = new THREE.Color();
       for (var j = 0; j < ORN_COUNT; j++) {
         var tt = Math.random();
@@ -247,7 +247,7 @@
         var px = Math.cos(seg - Math.PI / 2) * rad;
         var py = Math.sin(seg - Math.PI / 2) * rad;
         starPos[s * 3] = px; starPos[s * 3 + 1] = py; starPos[s * 3 + 2] = 0;
-        cStar.set(s % 2 === 0 ? '#fff6cf' : '#ffd54a');
+        cStar.set(s % 2 === 0 ? '#ffffff' : '#ff8ae0');
         starCol[s * 3] = cStar.r; starCol[s * 3 + 1] = cStar.g; starCol[s * 3 + 2] = cStar.b;
       }
       var starGeo = new THREE.BufferGeometry();
@@ -260,7 +260,7 @@
       // 星芒光晕
       var glowTex = circleTexture();
       var starGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: glowTex, color: 0xffd54a, transparent: true,
+        map: glowTex, color: 0xff7ad0, transparent: true,
         blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.9
       }));
       starGlow.scale.set(2.6, 2.6, 1);
@@ -271,9 +271,9 @@
       treeGroup.add(treePts); treeGroup.add(ornPts); treeGroup.add(trunkPts); treeGroup.add(star);
       scene.add(treeGroup);
 
-      // 背景蓝色光晕，衬托整棵树更绚丽
+      // 背景紫色光晕，衬托整棵树更绚丽
       var halo = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: circleTexture(), color: 0x2a6fd0, transparent: true,
+        map: circleTexture(), color: 0xa040c0, transparent: true,
         blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.32
       }));
       halo.scale.set(18, 18, 1);
@@ -299,7 +299,7 @@
       scene.add(basePts);
 
       // ---------- 飘雪 ----------
-      var FLAKE = 380;
+      var FLAKE = 800;
       var flakePos = new Float32Array(FLAKE * 3);
       var flakeSpeed = new Float32Array(FLAKE);
       for (var f = 0; f < FLAKE; f++) {
@@ -311,8 +311,8 @@
       var flakeGeo = new THREE.BufferGeometry();
       flakeGeo.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
       var flakePts = new THREE.Points(flakeGeo, new THREE.PointsMaterial({
-        size: 0.07, map: dotTex, color: 0xffffff,
-        transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending
+        size: 0.09, map: dotTex, color: 0xffffff,
+        transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       scene.add(flakePts);
 
