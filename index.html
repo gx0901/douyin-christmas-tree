@@ -172,8 +172,8 @@
         treePos[i * 3]     = Math.cos(th) * r;
         treePos[i * 3 + 1] = y;
         treePos[i * 3 + 2] = Math.sin(th) * r;
-        // 蓝色渐变：底部深海蓝 -> 顶部冰蓝/青
-        cTree.setHSL(0.62 - t * 0.12, rand(0.65, 0.9), rand(0.22, 0.32) + t * 0.28);
+        // 冰蓝渐变：底部深钢蓝 -> 顶部冰蓝/银白（匹配参考图）
+        cTree.setHSL(0.60 - t * 0.08, rand(0.45, 0.62), rand(0.24, 0.34) + t * 0.32);
         treeCol[i * 3] = cTree.r; treeCol[i * 3 + 1] = cTree.g; treeCol[i * 3 + 2] = cTree.b;
       }
       var treeGeo = new THREE.BufferGeometry();
@@ -188,7 +188,7 @@
       var ORN_COUNT = 320;
       var ornPos = new Float32Array(ORN_COUNT * 3);
       var ornCol = new Float32Array(ORN_COUNT * 3);
-      var palette = ['#4ad8ff', '#7aa2ff', '#ffffff', '#c0e0ff', '#ffd54a', '#ff7ae0', '#9b8cff', '#00e5ff'];
+      var palette = ['#4ad8ff', '#7aa2ff', '#ffffff', '#c0e0ff', '#dfeaff', '#bcd8ff', '#9ecbff', '#00e5ff'];
       var cOrn = new THREE.Color();
       for (var j = 0; j < ORN_COUNT; j++) {
         var tt = Math.random();
@@ -273,7 +273,7 @@
 
       // 背景蓝色光晕，衬托整棵树更绚丽
       var halo = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: circleTexture(), color: 0x1a5fff, transparent: true,
+        map: circleTexture(), color: 0x2a6fd0, transparent: true,
         blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.32
       }));
       halo.scale.set(18, 18, 1);
