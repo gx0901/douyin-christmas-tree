@@ -86,6 +86,23 @@
     -webkit-tap-highlight-color: transparent;
   }
   #musicBtn:active { transform: scale(.92); }
+
+  /* 左侧祝福文字 */
+  #sideText {
+    position: fixed; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    z-index: 6; pointer-events: none;
+    font-size: 21px; font-weight: 700;
+    letter-spacing: 10px; line-height: 1.25;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255,170,240,.85), 0 0 28px rgba(255,110,200,.55);
+    animation: sideFade 3.5s ease-in-out infinite;
+  }
+  @keyframes sideFade {
+    0%, 100% { opacity: .75; }
+    50%      { opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -97,6 +114,7 @@
   <div id="hint">👆 手指滑动旋转 · 点击绽放烟花 · 音乐自动播放</div>
   <div id="floatLayer"></div>
   <button id="musicBtn" title="音乐开关">🔔</button>
+  <div id="sideText">圣诞快乐<br>祝孙妍天天开心</div>
 
   <script>
     // —— 按顺序尝试多个 CDN 加载 Three.js，保证国内/手机都能打开 ——
