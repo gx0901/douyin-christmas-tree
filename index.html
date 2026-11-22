@@ -89,18 +89,30 @@
 
   /* 左侧祝福文字 */
   #sideText {
-    position: fixed; left: 12px; top: 50%;
+    position: fixed; left: 14px; top: 50%;
     transform: translateY(-50%);
-    writing-mode: vertical-rl;
     z-index: 6; pointer-events: none;
-    font-size: 21px; font-weight: 700;
-    letter-spacing: 10px; line-height: 1.25;
-    color: #fff;
-    text-shadow: 0 0 12px rgba(255,170,240,.85), 0 0 28px rgba(255,110,200,.55);
+    text-align: left; line-height: 1.5;
+  }
+  #sideText .line1 {
+    display: block;
+    font-family: 'Brush Script MT', 'Segoe Script', 'Snell Roundhand', 'Zapfino', 'KaiTi', cursive;
+    font-size: 24px; letter-spacing: 1px;
+  }
+  #sideText .line2 {
+    display: block;
+    font-family: 'STXingkai', '华文行楷', 'KaiTi', '楷体', 'STKaiti', 'FangSong', cursive;
+    font-size: 20px; letter-spacing: 3px;
+  }
+  #sideText span {
+    background: linear-gradient(180deg, #ffffff 0%, #eaf5ff 40%, #bcdfff 75%, #ffffff 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,.9)) drop-shadow(0 0 16px rgba(160,210,255,.6));
     animation: sideFade 3.5s ease-in-out infinite;
   }
   @keyframes sideFade {
-    0%, 100% { opacity: .75; }
+    0%, 100% { opacity: .8; }
     50%      { opacity: 1; }
   }
 </style>
@@ -114,7 +126,10 @@
   <div id="hint">👆 手指滑动旋转 · 点击绽放烟花 · 音乐自动播放</div>
   <div id="floatLayer"></div>
   <button id="musicBtn" title="音乐开关">🔔</button>
-  <div id="sideText">圣诞快乐<br>祝孙妍天天开心</div>
+  <div id="sideText">
+    <span class="line1">Merry Christmas</span>
+    <span class="line2">祝孙妍天天开心</span>
+  </div>
 
   <script>
     // —— 按顺序尝试多个 CDN 加载 Three.js，保证国内/手机都能打开 ——
