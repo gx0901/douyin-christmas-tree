@@ -59,6 +59,33 @@
     0%, 100% { opacity: .25; }
     50%      { opacity: .8; }
   }
+
+  /* 飘字 */
+  #floatLayer { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 6; }
+  .float-word {
+    position: absolute; bottom: -12%;
+    color: rgba(255,255,255,.9);
+    font-weight: 600; letter-spacing: 1px; white-space: nowrap;
+    text-shadow: 0 0 14px rgba(255,200,80,.7), 0 0 30px rgba(255,120,60,.4);
+    animation: floatUp linear forwards;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) translateX(0) scale(.7); opacity: 0; }
+    12%  { opacity: 1; }
+    88%  { opacity: .85; }
+    100% { transform: translateY(-125vh) translateX(var(--sway)) scale(1.2); opacity: 0; }
+  }
+
+  /* 音乐按钮 */
+  #musicBtn {
+    position: fixed; top: calc(env(safe-area-inset-top) + 12px); right: 14px;
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.08); backdrop-filter: blur(6px);
+    color: #fff; font-size: 22px; cursor: pointer; z-index: 7;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #musicBtn:active { transform: scale(.92); }
 </style>
 </head>
 <body>
@@ -67,7 +94,9 @@
     <div class="cn">🎄 圣诞快乐</div>
     <div class="en">Merry Christmas</div>
   </div>
-  <div id="hint">👆 手指滑动旋转 · 点击绽放烟花</div>
+  <div id="hint">👆 手指滑动旋转 · 点击绽放烟花 · 音乐自动播放</div>
+  <div id="floatLayer"></div>
+  <button id="musicBtn" title="音乐开关">🔔</button>
 
   <script>
     // —— 按顺序尝试多个 CDN 加载 Three.js，保证国内/手机都能打开 ——
@@ -124,9 +153,9 @@
 
       // ---------- 圣诞树粒子 ----------
       var H = 6.4, bottomY = -3.2, topY = 3.2, R = 2.7;
-      function profileRadius(t) { // t: 0 顶 -> 1 底，锯齿层让树更有层次
-        var cone = R * t;
-        var wave = 1 + 0.38 * Math.sin(Math.PI * 7 * t - Math.PI / 2);
+      function profileRadius(t) { // t: 0 底(宽) -> 1 顶(尖)，层叠波浪
+        var cone = R * (1 - t);
+        var wave = 1 + 0.35 * Math.sin(Math.PI * 8 * t);
         return cone * wave;
       }
 
@@ -135,7 +164,7 @@
       var treeCol = new Float32Array(TREE_COUNT * 3);
       var cGreen = new THREE.Color();
       for (var i = 0; i < TREE_COUNT; i++) {
-        var t = Math.pow(Math.random(), 0.75);              // 偏向下部（更茂盛）
+        var t = Math.pow(Math.random(), 1.5);               // 偏向下部（底部更茂盛）
         var y = bottomY + t * H;
         var r = profileRadius(t) * rand(0.72, 1.0);          // 略向内填充
         var th = Math.random() * Math.PI * 2;
@@ -409,6 +438,98 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
     }
+
+  // ================= 背景音乐（八音盒 · Jingle Bells） =================
+  var audioCtx = null, musicOn = false, nextNoteTime = 0, noteIndex = 0, musicTimer = null;
+  var BEAT = 0.24;
+  var N_E = 329.63, N_G = 392.00, N_C = 261.63, N_D = 293.66, N_F = 349.23;
+  var MELODY = [
+    [N_E,1],[N_E,1],[N_E,2],
+    [N_E,1],[N_E,1],[N_E,2],
+    [N_E,1],[N_G,1],[N_C,1],[N_D,1],[N_E,4],
+    [N_F,1],[N_F,1],[N_F,1],[N_F,1],[N_F,2],
+    [N_E,1],[N_E,1],[N_E,1],[N_E,1],[N_E,2],
+    [N_D,1],[N_D,1],[N_E,1],[N_D,1],[N_G,4]
+  ];
+
+  function playNote(freq, time, dur) {
+    var g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(0.5, time + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + dur * 0.9);
+    g.connect(audioCtx.destination);
+    var o = audioCtx.createOscillator();
+    o.type = 'sine'; o.frequency.value = freq;
+    o.connect(g); o.start(time); o.stop(time + dur);
+    var o2 = audioCtx.createOscillator();
+    o2.type = 'sine'; o2.frequency.value = freq * 2;
+    var g2 = audioCtx.createGain();
+    g2.gain.setValueAtTime(0.0001, time);
+    g2.gain.exponentialRampToValueAtTime(0.14, time + 0.01);
+    g2.gain.exponentialRampToValueAtTime(0.0001, time + dur * 0.5);
+    o2.connect(g2); g2.connect(audioCtx.destination);
+    o2.start(time); o2.stop(time + dur);
+  }
+
+  function scheduleMelody() {
+    while (nextNoteTime < audioCtx.currentTime + 0.7) {
+      var note = MELODY[noteIndex];
+      playNote(note[0], nextNoteTime, note[1] * BEAT);
+      nextNoteTime += note[1] * BEAT;
+      noteIndex = (noteIndex + 1) % MELODY.length;
+    }
+    musicTimer = setTimeout(scheduleMelody, 250);
+  }
+
+  function startMusic() {
+    if (musicOn) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    nextNoteTime = audioCtx.currentTime + 0.1;
+    noteIndex = 0;
+    musicOn = true;
+    document.getElementById('musicBtn').textContent = '🔕';
+    scheduleMelody();
+  }
+  function stopMusic() {
+    if (!musicOn) return;
+    musicOn = false;
+    clearTimeout(musicTimer);
+    document.getElementById('musicBtn').textContent = '🔔';
+  }
+
+  document.getElementById('musicBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    musicOn ? stopMusic() : startMusic();
+  });
+
+  // 首次任意交互自动开始音乐（满足移动端自动播放限制）
+  function onFirstInteract(e) {
+    window.removeEventListener('pointerdown', onFirstInteract);
+    window.removeEventListener('touchstart', onFirstInteract);
+    if (e.target && e.target.id === 'musicBtn') return; // 按钮自己处理
+    startMusic();
+  }
+  window.addEventListener('pointerdown', onFirstInteract);
+  window.addEventListener('touchstart', onFirstInteract, { passive: true });
+
+  // ================= 飘字 =================
+  var floatMsgs = ['🎄 圣诞快乐','Merry Christmas','❄️ 平安喜乐','🎁 心想事成','⭐ 万事如意','🎅 圣诞老人','❤️ 平安夜','✨ Merry Xmas'];
+  var floatLayer = document.getElementById('floatLayer');
+  function spawnFloat() {
+    var el = document.createElement('div');
+    el.className = 'float-word';
+    el.textContent = floatMsgs[(Math.random() * floatMsgs.length) | 0];
+    el.style.left = (6 + Math.random() * 68) + '%';
+    el.style.setProperty('--sway', (Math.random() * 200 - 100) + 'px');
+    el.style.animationDuration = (8 + Math.random() * 5) + 's';
+    el.style.fontSize = (15 + Math.random() * 11) + 'px';
+    floatLayer.appendChild(el);
+    setTimeout(function () { el.remove(); }, 14000);
+  }
+  spawnFloat();
+  setInterval(spawnFloat, 1200);
+
   </script>
 </body>
 </html>
